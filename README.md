@@ -1,6 +1,6 @@
 <p align="center">
 <a href="https://www.insidesherpa.com/virtual-internships/prototype/oRMogWRHeewqHzA7u/College%20Students%3A%20Learn%20how%20to%20work%20at%20a%20YC%20startup" target="_blank">
-<img src="https://s3-ap-southeast-2.amazonaws.com/insidesherpa-assets/icons/promo_files/Screen+Shot+2019-02-11+at+11.32.13+pm.png"></a>
+<img src="https://s3-ap-southeast-2.amazonaws.com/insidesherpa-assets/icons/promo_files/ycombinator-abovefold.png.png"></a>
 </p>
 
 <p align="center"> 
