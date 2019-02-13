@@ -1,6 +1,9 @@
 <p align="center">
-<a href="https://www.insidesherpa.com/virtual-internships/prototype/oRMogWRHeewqHzA7u/College%20Students%3A%20Learn%20how%20to%20work%20at%20a%20YC%20startup" target="_blank">
-<img src="https://s3-ap-southeast-2.amazonaws.com/insidesherpa-assets/icons/promo_files/ycombinator-abovefold.png"></a>
+<a href="https://www.insidesherpa.com/virtual-internships/prototype/oRMogWRHeewqHzA7u/College%20Students%3A%20Learn%20how%20to%20work%20at%20a%20YC%20startup">
+<img src="https://s3-ap-southeast-2.amazonaws.com/insidesherpa-assets/yc/yc-blade.png"></a>
+<br><br>
+  <a href="https://www.insidesherpa.com/virtual-internships/prototype/oRMogWRHeewqHzA7u/College%20Students%3A%20Learn%20how%20to%20work%20at%20a%20YC%20startup">
+  <img src="https://s3-ap-southeast-2.amazonaws.com/insidesherpa-assets/yc/workatastartup_logo_orange-c2a27f6374f9395166ee9906e2e0873af835b3c6132ae6aa0543582298567041.svg"></a>
 </p>
 
 <p align="center"> 
@@ -10,7 +13,7 @@
 	| 
 	<b><a href="https://www.insidesherpa.com/modules/oRMogWRHeewqHzA7u/nEg96uYWs9oh5Jrbc" target="_blank">Link to Module 3</a></b>		
 	| 
-	<b><a href="https://www.insidesherpa.com/virtual-internships/prototype/oRMogWRHeewqHzA7u/College%20Students%3A%20Learn%20how%20to%20work%20at%20a%20YC%20startup">YCombinator Program</a></b>
+	<b><a href="https://www.insidesherpa.com/virtual-internships/prototype/oRMogWRHeewqHzA7u/College%20Students%3A%20Learn%20how%20to%20work%20at%20a%20YC%20startup">Link to Y Combinator Program</a></b>
 </p>
 
 <h1> Introduction</h1> 
