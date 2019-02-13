@@ -23,8 +23,7 @@
 <h2 id="task"> Module 3 Task Overview </h2>
 <b>Analytics</b> - Analyse the latest feature releases.
 <p>We want to generate a few key ideas to move us on one of our core metrics: daily active users.
-	
-<br>
+<br><br>
 <b>Aim:</b>Create insights and ideas backed by data.</p>
 
 
