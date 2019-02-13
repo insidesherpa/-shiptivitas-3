@@ -23,10 +23,9 @@
 <h2 id="task"> Module 3 Task Overview </h2>
 <b>Analytics</b> - Analyse the latest feature releases.
 <p>We want to generate a few key ideas to move us on one of our core metrics: daily active users.
+	
+<br>
 <b>Aim:</b>Create insights and ideas backed by data.</p>
-
-
-<p>On 2018-06-02, we released the Kanban Board on Shiptivity app. It has a major impact on our stats and we want to iterate on it</p>
 
 
 <b>Acceptance Criteria</b>
