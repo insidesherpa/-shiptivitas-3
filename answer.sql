@@ -13,7 +13,11 @@ GROUP BY day_of_year
 
 
 -- PART 2: Create a SQL query that indicates the number of status changes by card
-
+SELECT cardId,
+count(id) as n_status_change
+FROM card_change_history
+WHERE oldStatus <> newStatus
+GROUP BY cardId;
 
 
 
