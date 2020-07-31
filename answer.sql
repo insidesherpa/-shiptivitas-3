@@ -2,6 +2,13 @@
 
 -- PART 1: Create a SQL query that maps out the daily average users before and after the feature change
 
+SELECT 
+count(distinct user_id) as daily_users,
+DATE(login_timestamp, 'unixepoch') as login_date,
+strftime('%j', DATE(login_timestamp, 'unixepoch')) AS day_of_year
+FROM login_history
+GROUP BY day_of_year
+
 
 
 
