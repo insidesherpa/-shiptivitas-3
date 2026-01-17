@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiptivitas Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #10b981;
+            --accent: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-hover: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-value.increase { color: var(--secondary); }
+        .metric-value.primary { color: var(--primary); }
+        .metric-value.accent { color: var(--accent); }
+
+        .metric-change {
+            font-size: 0.875rem;
+            color: var(--secondary);
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 1200px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .chart-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .insights-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .insights-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--danger) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .insight-card {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .insight-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .insight-card .hypothesis {
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+
+        .insight-card .impact {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .insight-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .flow-chart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            padding: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .status-box {
+            background: var(--bg-card-hover);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            min-width: 140px;
+        }
+
+        .status-box.backlog { border: 2px solid var(--danger); }
+        .status-box.in-progress { border: 2px solid var(--accent); }
+        .status-box.complete { border: 2px solid var(--secondary); }
+
+        .status-box .count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .status-box .label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .flow-arrow .arrow-count {
+            font-size: 0.875rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .release-marker {
+            position: absolute;
+            width: 2px;
+            background: var(--danger);
+            height: 100%;
+            z-index: 10;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Shiptivitas Analytics Dashboard</h1>
+        <p>Kanban Board Feature Analysis | Released June 2, 2018</p>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-label">Avg Daily Users (Before Kanban)</div>
+            <div class="metric-value primary">3.6</div>
+            <div class="metric-change">Feb 3 - Jun 1, 2018</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Avg Daily Users (After Kanban)</div>
+            <div class="metric-value increase">11.8</div>
+            <div class="metric-change">Jun 2, 2018 - Feb 1, 2019</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Growth Impact</div>
+            <div class="metric-value accent">+225%</div>
+            <div class="metric-change">3.25x increase in engagement</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Total Card Status Changes</div>
+            <div class="metric-value primary">486</div>
+            <div class="metric-change">Across 200 cards</div>
+        </div>
+    </div>
+
+    <div class="charts-container">
+        <div class="chart-card full-width">
+            <h3>📈 Daily Active Users Over Time</h3>
+            <div class="chart-wrapper">
+                <canvas id="dauChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>🔄 Card Status Changes Distribution</h3>
+            <div class="chart-wrapper">
+                <canvas id="changesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h3>📊 Status Transition Flow</h3>
+            <div class="flow-chart">
+                <div class="status-box backlog">
+                    <div class="count">200</div>
+                    <div class="label">Created → Backlog</div>
+                </div>
+                <div class="flow-arrow">
+                    <span>→</span>
+                    <span class="arrow-count">167</span>
+                </div>
+                <div class="status-box in-progress">
+                    <div class="count">167</div>
+                    <div class="label">In Progress</div>
+                </div>
+                <div class="flow-arrow">
+                    <span>→</span>
+                    <span class="arrow-count">103</span>
+                </div>
+                <div class="status-box complete">
+                    <div class="count">103</div>
+                    <div class="label">Complete</div>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-secondary); font-size: 0.875rem; margin-top: 1rem;">
+                <strong>Regressions:</strong> 11 cards moved back (in-progress → backlog), 5 cards reopened (complete → in-progress)
+            </div>
+        </div>
+    </div>
+
+    <div class="insights-section">
+        <h2>💡 Three Actionable Feature Ideas to Increase DAU</h2>
+
+        <div class="insight-card">
+            <h4>1. Smart Notification System & Daily Digest</h4>
+            <p class="hypothesis"><strong>Hypothesis:</strong> Users who are actively moving cards and making progress are more engaged. By sending personalized daily digest emails showing team activity, card movements, and pending items, we can create habit loops that bring users back daily.</p>
+            <span class="impact">Expected Impact: +15-25% DAU increase</span>
+            <p><strong>Feature:</strong> Implement a smart notification system that sends:
+                <br>• Morning digest with "cards needing attention"
+                <br>• Real-time notifications when cards are assigned or moved
+                <br>• Weekly progress summaries with team metrics
+                <br>This leverages the proven engagement pattern (users logging in to check/update cards) and amplifies it through timely reminders.</p>
+        </div>
+
+        <div class="insight-card">
+            <h4>2. Collaborative Comments & @Mentions on Cards</h4>
+            <p class="hypothesis"><strong>Hypothesis:</strong> The 16 regression events (cards moving backward) suggest communication gaps. Adding collaborative features will increase return visits as users come back to respond to discussions and check mentions.</p>
+            <span class="impact">Expected Impact: +20-30% DAU increase</span>
+            <p><strong>Feature:</strong> Add a comment thread to each card with:
+                <br>• @mention functionality to tag team members
+                <br>• File/image attachment support
+                <br>• Activity feed showing all card updates
+                <br>• Email notifications for mentions
+                <br>This creates "pull factors" that bring users back to respond, similar to social media notification patterns.</p>
+        </div>
+
+        <div class="insight-card">
+            <h4>3. Gamification: Progress Streaks & Team Leaderboards</h4>
+            <p class="hypothesis"><strong>Hypothesis:</strong> With 51.5% of cards completing the full workflow journey, users are motivated by completion. Adding visible progress tracking and competitive elements will increase daily check-ins.</p>
+            <span class="impact">Expected Impact: +10-20% DAU increase</span>
+            <p><strong>Feature:</strong> Implement a gamification layer including:
+                <br>• Daily login streaks with visual badges
+                <br>• Team productivity leaderboards (cards completed this week)
+                <br>• Personal velocity metrics ("You completed 5 cards this week, 2 more than last week!")
+                <br>• Achievement badges for milestones (first card completed, 10-day streak, etc.)
+                <br>This taps into intrinsic motivation and social proof to drive habitual usage.</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Generated for Shiptivitas Data Analytics Task | Data Period: Feb 2018 - Feb 2019</p>
+    </div>
+
+    <script>
+        // Daily Active Users Chart
+        const dauData = {
+            labels: ['2018-02-03', '2018-02-11', '2018-02-22', '2018-03-01', '2018-03-14', '2018-03-24', '2018-04-07', '2018-04-23', '2018-05-08', '2018-05-22', '2018-06-02', '2018-06-15', '2018-06-28', '2018-07-12', '2018-07-25', '2018-08-08', '2018-08-21', '2018-09-05', '2018-09-19', '2018-10-03', '2018-10-17', '2018-10-31', '2018-11-14', '2018-11-28', '2018-12-12', '2018-12-26', '2019-01-09', '2019-01-23'],
+            datasets: [{
+                label: 'Daily Active Users',
+                data: [1, 2, 4, 5, 5, 6, 5, 5, 4, 7, 10, 13, 10, 19, 12, 13, 23, 17, 16, 7, 10, 12, 8, 16, 7, 10, 10, 7],
+                borderColor: '#6366f1',
+                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        };
+
+        new Chart(document.getElementById('dauChart'), {
+            type: 'line',
+            data: dauData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#f1f5f9' }
+                    },
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                xMin: '2018-06-02',
+                                xMax: '2018-06-02',
+                                borderColor: '#ef4444',
+                                borderWidth: 2,
+                                label: {
+                                    content: 'Kanban Released',
+                                    enabled: true
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    },
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    }
+                }
+            }
+        });
+
+        // Card Changes Distribution Chart
+        const changesData = {
+            labels: ['1 change', '2 changes', '3 changes', '4 changes', '5 changes', '6 changes'],
+            datasets: [{
+                label: 'Number of Cards',
+                data: [38, 53, 100, 4, 4, 1],
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)',
+                    'rgba(236, 72, 153, 0.8)'
+                ],
+                borderColor: [
+                    '#6366f1',
+                    '#8b5cf6',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#ec4899'
+                ],
+                borderWidth: 2
+            }]
+        };
+
+        new Chart(document.getElementById('changesChart'), {
+            type: 'bar',
+            data: changesData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    },
+                    y: {
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
