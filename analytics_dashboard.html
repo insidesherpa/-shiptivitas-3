@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiptivitas Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #e0e7ff;
+            --secondary: #059669;
+            --secondary-light: #d1fae5;
+            --accent: #d97706;
+            --accent-light: #fef3c7;
+            --danger: #dc2626;
+            --blue: #2563eb;
+            --blue-light: #dbeafe;
+            
+            --bg-body: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar Layout */
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 3rem;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .menu-item a {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-item.active a {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .menu-item:not(.active) a:hover {
+            background-color: #f1f5f9;
+            color: var(--text-primary);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-footer strong {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 280px;
+            flex: 1;
+            padding: 3rem 4rem;
+            max-width: 1200px;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* Metrics Summary */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            border-color: var(--border-hover);
+        }
+
+        .metric-card.m-1 { border-left: 4px solid var(--primary); }
+        .metric-card.m-2 { border-left: 4px solid var(--secondary); }
+        .metric-card.m-3 { border-left: 4px solid var(--accent); }
+        .metric-card.m-4 { border-left: 4px solid var(--blue); }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .metric-value.increase { color: var(--secondary); }
+        .metric-value.primary { color: var(--primary); }
+        .metric-value.accent { color: var(--accent); }
+        .metric-value.blue { color: var(--blue); }
+
+        .metric-change {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Charts Section */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-row-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 1024px) {
+            .chart-row-split {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.75rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+        }
+
+        .chart-card h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 340px;
+        }
+
+        /* Transition Flow Graph */
+        .flow-chart {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 1rem 0;
+        }
+
+        .status-box {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1.25rem 0.5rem;
+            text-align: center;
+            flex: 1;
+            border: 1px solid var(--border);
+        }
+
+        .status-box.backlog { border-top: 3px solid var(--danger); }
+        .status-box.in-progress { border-top: 3px solid var(--accent); }
+        .status-box.complete { border-top: 3px solid var(--secondary); }
+
+        .status-box .count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .status-box .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        .flow-arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .flow-arrow span {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .flow-arrow .arrow-count {
+            font-size: 0.7rem;
+            color: var(--primary);
+            font-weight: 600;
+            background-color: var(--primary-light);
+            padding: 0.05rem 0.35rem;
+            border-radius: 4px;
+            margin-top: 2px;
+        }
+
+        .regression-summary {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 1.25rem;
+            padding: 0.75rem;
+            background-color: #fef2f2;
+            border-radius: 8px;
+            border: 1px solid #fee2e2;
+        }
+
+        /* Actionable Ideas */
+        .insights-section {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            padding: 2.25rem;
+            border: 1px solid var(--border);
+            margin-bottom: 3rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.05);
+        }
+
+        .insights-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .insight-card {
+            background-color: #f8fafc;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .insight-card:hover {
+            border-color: var(--border-hover);
+            background-color: #f1f5f9;
+        }
+
+        .insight-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .insight-card .hypothesis {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .insight-card .impact {
+            background-color: var(--secondary-light);
+            color: var(--secondary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            align-self: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .insight-card .feature-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            border-top: 1px solid var(--border);
+            padding-top: 0.85rem;
+        }
+
+        .feature-details strong {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-logo">S</div>
+            <span class="brand-name">Shiptivitas</span>
+        </div>
+        
+        <nav>
+            <ul class="sidebar-menu">
+                <li class="menu-item active">
+                    <a href="#">
+                        <span>📊</span> Overview
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <strong>Kanban Release</strong>
+            June 2, 2018
+        </div>
+    </aside>
+
+    <!-- Main Content Panel -->
+    <main class="main-content">
+        <div class="header">
+            <h1>Analytics Overview</h1>
+            <p>Evaluating Kanban Board release performance and user activity milestones.</p>
+        </div>
+
+        <!-- Metric Scorecards -->
+        <div class="metrics-grid">
+            <div class="metric-card m-1">
+                <div class="metric-label">Avg Daily Users (Before)</div>
+                <div class="metric-value primary">3.6</div>
+                <div class="metric-change">Feb 3 - Jun 1, 2018</div>
+            </div>
+            <div class="metric-card m-2">
+                <div class="metric-label">Avg Daily Users (After)</div>
+                <div class="metric-value increase">11.8</div>
+                <div class="metric-change">Jun 2, 2018 - Feb 1, 2019</div>
+            </div>
+            <div class="metric-card m-3">
+                <div class="metric-label">Growth Impact</div>
+                <div class="metric-value accent">+225%</div>
+                <div class="metric-change">3.25x engagement lift</div>
+            </div>
+            <div class="metric-card m-4">
+                <div class="metric-label">Total Status Changes</div>
+                <div class="metric-value blue">486</div>
+                <div class="metric-change">Across 200 board cards</div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <!-- Timeline Chart -->
+            <div class="chart-card">
+                <h3>Daily Active Users Over Time</h3>
+                <div class="chart-wrapper">
+                    <canvas id="dauChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Double-column Split Charts -->
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <h3>Card Status Changes Distribution</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="changesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Status Transition Flow</h3>
+                    <div class="flow-chart">
+                        <div class="status-box backlog">
+                            <div class="count">200</div>
+                            <div class="label">Created → Backlog</div>
+                        </div>
+                        <div class="flow-arrow">
+                            <span>→</span>
+                            <span class="arrow-count">167</span>
+                        </div>
+                        <div class="status-box in-progress">
+                            <div class="count">167</div>
+                            <div class="label">In Progress</div>
+                        </div>
+                        <div class="flow-arrow">
+                            <span>→</span>
+                            <span class="arrow-count">103</span>
+                        </div>
+                        <div class="status-box complete">
+                            <div class="count">103</div>
+                            <div class="label">Complete</div>
+                        </div>
+                    </div>
+                    <div class="regression-summary">
+                        <strong>Regressions Spotted:</strong> 11 cards moved backwards (In-Progress → Backlog) and 5 cards reopened (Complete → In-Progress).
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actionable Ideas -->
+        <div class="insights-section">
+            <h2>Three Actionable Feature Ideas to Increase DAU</h2>
+            
+            <div class="ideas-grid">
+                <div class="insight-card">
+                    <div>
+                        <h4>1. Smart Notifications & Daily Digest</h4>
+                        <div class="hypothesis">
+                            <strong>Hypothesis:</strong> Users moving cards are highly engaged. Sending personalized daily digests listing updates and assigned items creates habit loops to pull team members back.
+                        </div>
+                    </div>
+                    <div>
+                        <span class="impact">Expected Impact: +15-25% DAU</span>
+                        <div class="feature-details">
+                            <strong>Feature:</strong> Morning notifications summarizing pending tasks, mentions, and updates, paired with real-time assignment alerts.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div>
+                        <h4>2. Comments & @Mentions on Cards</h4>
+                        <div class="hypothesis">
+                            <strong>Hypothesis:</strong> Regression occurrences (16 events moving cards back) imply coordination gaps. Centralizing team discussions on cards reduces reliance on external tools.
+                        </div>
+                    </div>
+                    <div>
+                        <span class="impact">Expected Impact: +20-30% DAU</span>
+                        <div class="feature-details">
+                            <strong>Feature:</strong> In-card comment threads, tag alerts (@user), attachments, and automatic inbox notifications.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-card">
+                    <div>
+                        <h4>3. Streaks & Leaderboards</h4>
+                        <div class="hypothesis">
+                            <strong>Hypothesis:</strong> With 51.5% completion velocity, visual feedback systems drive user gratification, boosting daily check-ins.
+                        </div>
+                    </div>
+                    <div>
+                        <span class="impact">Expected Impact: +10-20% DAU</span>
+                        <div class="feature-details">
+                            <strong>Feature:</strong> Streak alerts, weekly velocity widgets, badges for completed tasks, and clean team leaderboards.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Generated for Shiptivitas Data Analytics Task | Data Period: Feb 2018 - Feb 2019</p>
+        </div>
+    </main>
+
+    <script>
+        // Daily Active Users Chart
+        const dauData = {
+            labels: ['2018-02-03', '2018-02-11', '2018-02-22', '2018-03-01', '2018-03-14', '2018-03-24', '2018-04-07', '2018-04-23', '2018-05-08', '2018-05-22', '2018-06-02', '2018-06-15', '2018-06-28', '2018-07-12', '2018-07-25', '2018-08-08', '2018-08-21', '2018-09-05', '2018-09-19', '2018-10-03', '2018-10-17', '2018-10-31', '2018-11-14', '2018-11-28', '2018-12-12', '2018-12-26', '2019-01-09', '2019-01-23'],
+            datasets: [{
+                label: 'Daily Active Users',
+                data: [1, 2, 4, 5, 5, 6, 5, 5, 4, 7, 10, 13, 10, 19, 12, 13, 23, 17, 16, 7, 10, 12, 8, 16, 7, 10, 10, 7],
+                borderColor: '#4f46e5',
+                backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2
+            }]
+        };
+
+        new Chart(document.getElementById('dauChart'), {
+            type: 'line',
+            data: dauData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: { color: '#0f172a', font: { family: 'Outfit' } }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#475569', font: { family: 'Outfit' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                    },
+                    y: {
+                        ticks: { color: '#475569', font: { family: 'Outfit' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                    }
+                }
+            }
+        });
+
+        // Card Changes Distribution Chart
+        const changesData = {
+            labels: ['1 change', '2 changes', '3 changes', '4 changes', '5 changes', '6 changes'],
+            datasets: [{
+                label: 'Number of Cards',
+                data: [38, 53, 100, 4, 4, 1],
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)',
+                    'rgba(236, 72, 153, 0.7)'
+                ],
+                borderColor: [
+                    '#6366f1',
+                    '#8b5cf6',
+                    '#10b981',
+                    '#f59e0b',
+                    '#ef4444',
+                    '#ec4899'
+                ],
+                borderWidth: 1.5,
+                borderRadius: 8
+            }]
+        };
+
+        new Chart(document.getElementById('changesChart'), {
+            type: 'bar',
+            data: changesData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#475569', font: { family: 'Outfit' } },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { color: '#475569', font: { family: 'Outfit' } },
+                        grid: { color: 'rgba(0, 0, 0, 0.04)' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
